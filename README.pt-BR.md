@@ -42,6 +42,16 @@ iOS 17–18. Está disponível em inglês (padrão) e português; dá para troca
 
 Com Apple ID gratuito o app expira em 7 dias; rode de novo pelo Xcode para renovar.
 
+Em um IPA assinado para desenvolvimento, o perfil de provisionamento precisa incluir
+seu iPhone e estar dentro da validade. Para instalar sem assinar de novo, descompacte
+o IPA e arraste `Payload/PhilipsTVRemote.app` para a janela Devices and Simulators do
+Xcode, no iPhone conectado. Ao atualizar, mantenha o identificador do app e o time de
+assinatura para preservar os dados. Contas gratuitas permitem até três apps instalados.
+
+O erro `7252` do Sideloadly (certificado não encontrado no time) acontece na solicitação
+de assinatura à Apple; mudar o identificador do IPA não corrige essa solicitação. Um
+build já assinado pode ser instalado diretamente pelo Xcode.
+
 ## Descobrir o IP da TV
 
 Use o jeito mais fácil para você:

@@ -41,6 +41,16 @@ It's available in English (default) and Portuguese; you can switch in Settings.
 
 With a free Apple ID the app expires after 7 days; run it from Xcode again to renew it.
 
+For a development-signed IPA, the embedded provisioning profile must include your
+iPhone and must not have expired. To install without signing it again, unzip the IPA
+and drag `Payload/PhilipsTVRemote.app` into Xcode's Devices and Simulators window for
+your connected iPhone. Keep the installed bundle identifier and signing team when
+updating to preserve app data. Free accounts support up to three installed apps.
+
+Sideloadly error `7252` (certificate not found on the team) concerns its Apple signing
+request; changing the IPA's bundle identifier does not fix that request. An already
+signed build can instead be installed directly through Xcode.
+
 ## Find your TV's IP address
 
 Pick whichever is easiest:
