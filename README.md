@@ -82,6 +82,10 @@ your router's DHCP settings so you don't have to update the app.
 
 The IP and language are stored on the phone only.
 
+The first time the app reaches the TV, iOS asks for local network access; allow it. That prompt
+follows the phone's language (English or Portuguese), not the in-app switch: iOS shows system
+prompts in the device language.
+
 ## Power
 
 On this TV generation, real standby turns the Wi-Fi off, so nothing on the network can turn
@@ -129,6 +133,8 @@ generation.
 | `TVClient.swift` | JointSpace v1 HTTP client, power logic |
 | `RemoteKey.swift` | Key names the TV accepts |
 | `Language.swift` | In-app English/Portuguese strings |
+| `InfoPlist.xcstrings` | Local network prompt in English and Portuguese |
+| `scripts/icon.swift` | Draws the app icon (`swift scripts/icon.swift`) |
 
 ## Privacy
 

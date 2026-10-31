@@ -88,6 +88,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				"pt-BR",
 				Base,
 			);
 			mainGroup = BA576B7CA58F77C8D7513435;
@@ -165,7 +166,7 @@
 				DEVELOPMENT_TEAM = A248CUBHTL;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Sends remote-control commands to your TV on the local network.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Sends remote-control commands to your TV on the local network";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -189,7 +190,7 @@
 				DEVELOPMENT_TEAM = A248CUBHTL;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Sends remote-control commands to your TV on the local network.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Sends remote-control commands to your TV on the local network";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;

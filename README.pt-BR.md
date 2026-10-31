@@ -83,6 +83,10 @@ configurações de DHCP do roteador para não precisar atualizar o app.
 
 O IP e o idioma ficam salvos só no celular.
 
+Na primeira vez que o app fala com a TV, o iOS pede acesso à rede local; permita. Esse aviso
+segue o idioma do celular (inglês ou português), não o seletor do app: o iOS mostra avisos do
+sistema no idioma do aparelho.
+
 ## Energia
 
 Nesta geração de TV, o standby de verdade desliga o Wi-Fi, então nada na rede consegue
@@ -128,6 +132,8 @@ O app usa JointSpace v1 em HTTP simples na porta 1925, sem autenticação nesta 
 | `TVClient.swift` | Cliente HTTP JointSpace v1, lógica de energia |
 | `RemoteKey.swift` | Nomes de teclas aceitos pela TV |
 | `Language.swift` | Textos em inglês/português |
+| `InfoPlist.xcstrings` | Aviso de rede local em inglês e português |
+| `scripts/icon.swift` | Desenha o ícone do app (`swift scripts/icon.swift`) |
 
 ## Privacidade
 
