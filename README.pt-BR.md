@@ -6,8 +6,9 @@ Controle remoto nativo em SwiftUI para iPhone, feito para TVs Philips NetTV mais
 (chassi TPM16.5L, ex.: **32PHG5201/78**). Ele conversa com a TV pela rede local através da
 API JointSpace v1. Sem anúncios, sem conta, sem nuvem, sem rastreamento.
 
-A interface usa Liquid Glass no iOS 26 ou superior, e um visual com material comum no
-iOS 17–18. Está disponível em inglês (padrão) e português; dá para trocar nos Ajustes.
+A interface é sempre escura: fundo preto, superfícies brancas discretas e um único destaque azul
+(#346bf1), usado só para marcar um estado ativo (conectada, mudo, a opção selecionada). Os botões
+usam Liquid Glass no iOS 26 ou superior e botões com borda no iOS 17–18. Cada toque dá uma vibração leve. Está disponível em inglês (padrão) e português; dá para trocar nos Ajustes.
 
 ## Recursos
 
@@ -122,7 +123,7 @@ O app usa JointSpace v1 em HTTP simples na porta 1925, sem autenticação nesta 
 | Arquivo | O que faz |
 | --- | --- |
 | `PhilipsTVRemoteApp.swift` | Ponto de entrada do app |
-| `ContentView.swift` | Layout do controle, tela de ajustes, estilo glass |
+| `ContentView.swift` | Layout do controle, tela de ajustes, estilo dos botões |
 | `SourceView.swift` | Seletor de fontes |
 | `TVClient.swift` | Cliente HTTP JointSpace v1, lógica de energia |
 | `RemoteKey.swift` | Nomes de teclas aceitos pela TV |

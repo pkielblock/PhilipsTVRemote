@@ -6,7 +6,9 @@ A native SwiftUI iPhone remote for older Philips NetTV sets (chassis TPM16.5L, e
 **32PHG5201/78**). It talks to the TV over your local network through the JointSpace v1 API.
 No ads, no account, no cloud, no tracking.
 
-The UI uses Liquid Glass on iOS 26 and later, with a regular material look on iOS 17–18.
+The UI is always dark: a black background, quiet white surfaces and one blue accent (#346bf1)
+that only marks an active state (connected, muted, the selected option). Buttons use
+Liquid Glass on iOS 26 and later, with bordered buttons on iOS 17–18. Every press taps a light haptic.
 It's available in English (default) and Portuguese; you can switch in Settings.
 
 ## Features
@@ -122,7 +124,7 @@ generation.
 | File | What it does |
 | --- | --- |
 | `PhilipsTVRemoteApp.swift` | App entry point |
-| `ContentView.swift` | Remote layout, settings screen, glass styling |
+| `ContentView.swift` | Remote layout, settings screen, button styling |
 | `SourceView.swift` | Input picker |
 | `TVClient.swift` | JointSpace v1 HTTP client, power logic |
 | `RemoteKey.swift` | Key names the TV accepts |
