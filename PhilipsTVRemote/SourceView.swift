@@ -4,6 +4,7 @@ struct SourceView: View {
     @EnvironmentObject var tv: TVClient
     @Environment(\.dismiss) var dismiss
     @AppStorage(AppLanguage.storageKey) private var lang = AppLanguage.english.rawValue
+    @State private var picks = 0
 
     var body: some View {
         NavigationStack {
@@ -11,11 +12,12 @@ struct SourceView: View {
                 if tv.sources.isEmpty {
                     ContentUnavailableView(L("No sources", "Sem fontes"),
                         systemImage: "tv.slash",
-                        description: Text(L("The TV didn't respond. It must be on and on the same network.",
-                                             "A TV não respondeu. Ela precisa estar ligada e na mesma rede.")))
+                        description: Text(L("The TV must be on and on the same network",
+                                             "A TV precisa estar ligada e na mesma rede")))
                 } else {
                     List(tv.sources) { src in
                         Button {
+                            picks += 1
                             tv.setSource(src.id)
                             dismiss()
                         } label: {
@@ -27,9 +29,13 @@ struct SourceView: View {
                                 Text(src.id).font(.caption).foregroundStyle(.secondary)
                             }
                         }
+                        .listRowBackground(Color.white.opacity(0.04))
                     }
+                    .scrollContentBackground(.hidden)
                 }
             }
+            .background(Color.black.ignoresSafeArea())
+            .sensoryFeedback(.impact(weight: .light), trigger: picks)
             .navigationTitle(L("Sources", "Fontes"))
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

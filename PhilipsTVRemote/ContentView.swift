@@ -10,7 +10,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 22) {
+                VStack(spacing: 16) {
                     statusBar
                     powerRow
                     transportRows
@@ -23,10 +23,11 @@ struct ContentView: View {
                     sourcesButton
                     numberPad
                 }
-                .padding()
+                .padding(16)
             }
-            .background(RemoteBackground())
+            .background(Color.black.ignoresSafeArea())
             .navigationTitle("Philips TV")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showSettings = true } label: { Image(systemName: "gearshape") }
@@ -47,33 +48,37 @@ struct ContentView: View {
 
     private var statusBar: some View {
         HStack {
-            Circle().fill(tv.online ? .green : .secondary).frame(width: 10, height: 10)
+            Circle().fill(tv.online ? Color.accentColor : .secondary).frame(width: 8, height: 8)
             Text(tv.host.isEmpty ? L("Set the TV IP in settings", "Defina o IP da TV nos ajustes")
                  : tv.online ? L("Connected", "Conectada") : L("No response", "Sem resposta"))
                 .font(.caption).foregroundStyle(.secondary)
+                .contentTransition(.opacity)
             Spacer()
             if let v = tv.volume {
                 Label("\(v)", systemImage: tv.muted ? "speaker.slash" : "speaker.wave.2")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                    .contentTransition(.numericText(value: Double(v)))
             }
         }
-        .padding(.horizontal, 14).padding(.vertical, 10)
-        .glassBackground(in: Capsule())
+        .animation(.easeOut(duration: 0.2), value: tv.online)
+        .animation(.snappy, value: tv.volume)
+        .padding(.horizontal, 16).padding(.vertical, 12)
+        .background(.white.opacity(0.04), in: Capsule())
     }
 
     private var powerRow: some View {
         HStack(spacing: 16) {
-            bigButton(L("Turn on", "Ligar"), "power", tint: .green) { tv.screenOn() }
-            bigButton(L("Screen off", "Tela off"), "poweroff", tint: .red) { tv.screenOff() }
+            bigButton(L("Turn on", "Ligar"), "power") { tv.screenOn() }
+            bigButton(L("Screen off", "Tela off"), "poweroff") { tv.screenOff() }
         }
     }
 
     private var transportRows: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 8) {
             HStack(spacing: 12) {
                 key("", "stop.fill", .stop)
                 key("", "pause.fill", .pause)
-                key("", "record.circle", .record, tint: .red)
+                key("", "record.circle", .record)
             }
             HStack(spacing: 12) {
                 key("", "backward.fill", .rewind)
@@ -108,7 +113,7 @@ struct ContentView: View {
     }
 
     private var colorRow: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 12) {
             colorKey(.red, .red)
             colorKey(.green, .green)
             colorKey(.yellow, .yellow)
@@ -118,7 +123,7 @@ struct ContentView: View {
 
     /// D-pad with Info/Options above and Back/Multiview below, as on the remote.
     private var dpadCluster: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 8) {
             HStack {
                 key("Info", "info.circle", .info).frame(width: 104)
                 Spacer()
@@ -129,16 +134,16 @@ struct ContentView: View {
                 HStack(spacing: 4) {
                     arrow("chevron.left", .cursorLeft)
                     Button { press(.confirm) } label: {
-                        Text("OK").font(.title3.bold()).frame(width: 64, height: 64)
+                        Text("OK").font(.title3.weight(.semibold)).frame(width: 64, height: 64)
                     }
-                    .glassButton(prominent: true)
+                    .glassButton()
                     .buttonBorderShape(.circle)
                     arrow("chevron.right", .cursorRight)
                 }
                 arrow("chevron.down", .cursorDown)
             }
-            .padding(14)
-            .glassBackground(in: Circle())
+            .padding(16)
+            .background(.white.opacity(0.04), in: Circle())
             HStack {
                 key(L("Back", "Voltar"), "arrow.uturn.backward", .back).frame(width: 104)
                 Spacer()
@@ -172,7 +177,7 @@ struct ContentView: View {
             }.glassButton()
             digit(0)
             Button { press(.dot) } label: {
-                Text(".").font(.title.bold()).frame(maxWidth: .infinity, minHeight: 48)
+                Text(".").font(.title.weight(.semibold)).frame(maxWidth: .infinity, minHeight: 48)
             }.glassButton()
         }
     }
@@ -185,14 +190,13 @@ struct ContentView: View {
         tv.sendKey(k)
     }
 
-    private func key(_ title: String, _ icon: String, _ k: RemoteKey,
-                     tint: Color? = nil) -> some View {
+    private func key(_ title: String, _ icon: String, _ k: RemoteKey) -> some View {
         Button { press(k) } label: {
             VStack(spacing: 4) {
-                Image(systemName: icon).font(.title3).foregroundStyle(tint ?? .primary)
+                Image(systemName: icon).font(.title3)
                 if !title.isEmpty { Text(title).font(.caption2).lineLimit(1) }
             }
-            .frame(maxWidth: .infinity, minHeight: 54)
+            .frame(maxWidth: .infinity, minHeight: 56)
         }
         .glassButton()
     }
@@ -214,10 +218,12 @@ struct ContentView: View {
             }.glassButton()
             if let mid {
                 Button { press(mid.1) } label: {
-                    Image(systemName: mid.0).frame(maxWidth: .infinity, minHeight: 36)
+                    // Accent marks the active (muted) state.
+                    Image(systemName: mid.0).foregroundStyle(tv.muted ? Color.accentColor : .primary)
+                        .frame(maxWidth: .infinity, minHeight: 44)
                 }.glassButton()
             } else {
-                Text(label).font(.caption).foregroundStyle(.secondary).frame(minHeight: 36)
+                Text(label).font(.caption).foregroundStyle(.secondary).frame(minHeight: 44)
             }
             Button { press(down) } label: {
                 Image(systemName: "minus").frame(maxWidth: .infinity, minHeight: 44)
@@ -226,25 +232,27 @@ struct ContentView: View {
     }
 
     private func colorKey(_ k: RemoteKey, _ c: Color) -> some View {
+        // The TV's colour keys keep their colour as content, on a neutral key.
         Button { press(k) } label: {
-            Color.clear.frame(maxWidth: .infinity, minHeight: 28)
+            Capsule().fill(c.opacity(0.8)).frame(width: 32, height: 8)
+                .frame(maxWidth: .infinity, minHeight: 44)
         }
-        .glassButton(prominent: true, tint: c)
+        .glassButton()
     }
 
     private func digit(_ n: Int) -> some View {
         Button { if let k = RemoteKey.digit(n) { press(k) } } label: {
-            Text("\(n)").font(.title2).frame(maxWidth: .infinity, minHeight: 48)
+            Text("\(n)").font(.title3.monospacedDigit()).frame(maxWidth: .infinity, minHeight: 48)
         }.glassButton()
     }
 
-    private func bigButton(_ title: String, _ icon: String, tint: Color,
+    private func bigButton(_ title: String, _ icon: String,
                            action: @escaping () -> Void) -> some View {
         Button { taps += 1; action() } label: {
-            Label(title, systemImage: icon).font(.headline)
+            Label(title, systemImage: icon).font(.body.weight(.medium))
                 .frame(maxWidth: .infinity, minHeight: 56)
         }
-        .glassButton(prominent: true, tint: tint)
+        .glassButton()
     }
 }
 
@@ -267,25 +275,29 @@ struct SettingsView: View {
                     Button(L("Test connection", "Testar conexão")) { Task { await tv.refreshVolume() } }
                     if tv.online {
                         Label(L("Connected", "Conectada"), systemImage: "checkmark.circle.fill")
-                            .foregroundStyle(.green).font(.caption)
+                            .foregroundStyle(Color.accentColor).font(.caption)
                     } else if let e = tv.lastError {
-                        Text(e).foregroundStyle(.red).font(.caption)
+                        Text(e).foregroundStyle(Color(red: 240 / 255, green: 92 / 255, blue: 92 / 255)).font(.caption)
                     }
                 } header: {
                     Text("TV")
                 } footer: {
                     Text(L("On the TV: Home > Setup > Network settings > View network settings shows the IP. "
-                           + "The IP can change (DHCP); reserve a fixed IP for the TV in your router.",
+                           + "The IP can change (DHCP); reserve a fixed IP for the TV in your router",
                            "Na TV: Início > Configuração > Configurações de rede > Visualizar configurações de rede mostra o IP. "
-                           + "O IP pode mudar (DHCP); reserve um IP fixo para a TV no roteador."))
+                           + "O IP pode mudar (DHCP); reserve um IP fixo para a TV no roteador"))
                 }
+                .listRowBackground(Color.white.opacity(0.04))
                 Section(L("Language", "Idioma")) {
                     Picker(L("Language", "Idioma"), selection: $lang) {
                         ForEach(AppLanguage.allCases) { Text($0.displayName).tag($0.rawValue) }
                     }
                     .pickerStyle(.segmented)
                 }
+                .listRowBackground(Color.white.opacity(0.04))
             }
+            .scrollContentBackground(.hidden)
+            .background(Color.black.ignoresSafeArea())
             .navigationTitle(L("Settings", "Ajustes"))
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) { Button("OK") { dismiss() } }
@@ -294,39 +306,11 @@ struct SettingsView: View {
     }
 }
 
-/// Soft gradient so the glass has something to refract.
-struct RemoteBackground: View {
-    @Environment(\.colorScheme) private var scheme
-
-    var body: some View {
-        LinearGradient(
-            colors: scheme == .dark
-                ? [Color(red: 0.05, green: 0.07, blue: 0.16), Color(red: 0.12, green: 0.04, blue: 0.18)]
-                : [Color(red: 0.86, green: 0.91, blue: 1.0), Color(red: 0.96, green: 0.89, blue: 0.98)],
-            startPoint: .topLeading, endPoint: .bottomTrailing)
-        .ignoresSafeArea()
-    }
-}
-
 extension View {
     /// Liquid Glass button on iOS 26+, bordered style before that.
     @ViewBuilder
-    func glassButton(prominent: Bool = false, tint: Color? = nil) -> some View {
-        if #available(iOS 26, *) {
-            if prominent { buttonStyle(.glassProminent).tint(tint) } else { buttonStyle(.glass).tint(tint) }
-        } else {
-            if prominent { buttonStyle(.borderedProminent).tint(tint) } else { buttonStyle(.bordered).tint(tint) }
-        }
-    }
-
-    /// Liquid Glass surface on iOS 26+, thin material before that.
-    @ViewBuilder
-    func glassBackground<S: Shape>(in shape: S) -> some View {
-        if #available(iOS 26, *) {
-            glassEffect(.regular, in: shape)
-        } else {
-            background(.ultraThinMaterial, in: shape)
-        }
+    func glassButton() -> some View {
+        if #available(iOS 26, *) { buttonStyle(.glass) } else { buttonStyle(.bordered) }
     }
 }
 
