@@ -2,7 +2,6 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var tv: TVClient
-    @AppStorage(AppLanguage.storageKey) private var lang = AppLanguage.english.rawValue
     @State private var showSettings = false
     @State private var showSources = false
     @State private var taps = 0
@@ -32,7 +31,7 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showSettings = true } label: { Image(systemName: "gearshape") }
-                        .accessibilityLabel(L("Settings", "Ajustes"))
+                        .accessibilityLabel(String(localized: "Settings"))
                 }
             }
             .sensoryFeedback(.impact(weight: .light), trigger: taps)
@@ -49,35 +48,20 @@ struct ContentView: View {
 
     // MARK: - Sections
 
-    /// Kiel's RemoteStatusBar layout, kept local because volume can be unknown and mute changes the icon.
     private var statusBar: some View {
-        HStack(spacing: Kiel.Space.s3) {
-            StatusDot(color: tv.online ? Kiel.pos : Kiel.text3, live: tv.online)
-            Text(tv.scanning ? L("Searching for your TV…", "Procurando sua TV…")
-                 : tv.host.isEmpty ? L("No TV found. Open settings", "Nenhuma TV encontrada. Abra os ajustes")
-                 : tv.online ? L("Connected", "Conectada") : L("No response", "Sem resposta"))
-                .font(Kiel.Font.footnote).foregroundStyle(Kiel.text2)
-                .contentTransition(.opacity)
-            Spacer()
-            if let v = tv.volume {
-                Image(systemName: tv.muted ? "speaker.slash" : "speaker.wave.2").foregroundStyle(Kiel.text3)
-                Text("\(v)").font(Kiel.Font.footnote.weight(.semibold)).monospacedDigit()
-                    .foregroundStyle(Kiel.text)
-                    .contentTransition(.numericText(value: Double(v)))
-            }
-        }
-        .animation(Kiel.Motion.standard, value: tv.online)
-        .animation(Kiel.Motion.standard, value: tv.volume)
-        .padding(.horizontal, Kiel.Space.s4)
-        .frame(height: Kiel.Size.controlLG)
-        .background(Kiel.surface, in: Capsule())
-        .overlay(Capsule().stroke(Kiel.line, lineWidth: 1))
+        RemoteStatusBar(
+            connected: tv.online,
+            message: tv.scanning ? String(localized: "Searching for your TV…")
+                : tv.host.isEmpty ? String(localized: "No TV found. Open settings")
+                : tv.online ? String(localized: "Connected") : String(localized: "No response"),
+            volume: tv.volume,
+            isMuted: tv.muted)
     }
 
     private var powerRow: some View {
         HStack(spacing: Kiel.Space.s3) {
-            bigButton(L("Turn on", "Ligar"), "power") { tv.screenOn() }
-            bigButton(L("Screen off", "Tela off"), "poweroff") { tv.screenOff() }
+            bigButton(String(localized: "Turn on"), "power") { tv.screenOn() }
+            bigButton(String(localized: "Screen off"), "poweroff") { tv.screenOff() }
         }
     }
 
@@ -98,34 +82,34 @@ struct ContentView: View {
 
     private var toolRow: some View {
         HStack(spacing: Kiel.Space.s3) {
-            key(L("Adjust", "Ajustar"), "gearshape", .adjust)
-            key(L("Search", "Buscar"), "magnifyingglass", .find)
-            key(L("Format", "Formato"), "aspectratio", .viewmode)
+            key(String(localized: "Adjust"), "gearshape", .adjust)
+            key(String(localized: "Search"), "magnifyingglass", .find)
+            key(String(localized: "Format"), "aspectratio", .viewmode)
         }
     }
 
     private var guideRow: some View {
         HStack(spacing: Kiel.Space.s3) {
-            key(L("Guide", "Guia"), "list.bullet.rectangle", .guide)
-            key(L("List", "Lista"), "list.bullet", .list)
-            key(L("Sources", "Fontes"), "cable.connector", .source)
+            key(String(localized: "Guide"), "list.bullet.rectangle", .guide)
+            key(String(localized: "List"), "list.bullet", .list)
+            key(String(localized: "Sources"), "cable.connector", .source)
         }
     }
 
     private var smartRow: some View {
         HStack(spacing: Kiel.Space.s3) {
             key("Smart TV", "square.grid.2x2", .online)
-            key(L("Home", "Início"), "house.fill", .home)
-            key(L("TV / Exit", "TV / Sair"), "tv", .watchTV)
+            key(String(localized: "Home"), "house.fill", .home)
+            key(String(localized: "TV / Exit"), "tv", .watchTV)
         }
     }
 
     private var colorRow: some View {
         HStack(spacing: Kiel.Space.s3) {
-            colorKey(.red, .red, L("Red", "Vermelho"))
-            colorKey(.green, .green, L("Green", "Verde"))
-            colorKey(.yellow, .yellow, L("Yellow", "Amarelo"))
-            colorKey(.blue, .blue, L("Blue", "Azul"))
+            colorKey(.red, .red, String(localized: "Red"))
+            colorKey(.green, .green, String(localized: "Green"))
+            colorKey(.yellow, .yellow, String(localized: "Yellow"))
+            colorKey(.blue, .blue, String(localized: "Blue"))
         }
     }
 
@@ -135,7 +119,7 @@ struct ContentView: View {
             HStack {
                 key("Info", "info.circle", .info).frame(width: 104)
                 Spacer()
-                key(L("Options", "Opções"), "slider.horizontal.3", .options).frame(width: 104)
+                key(String(localized: "Options"), "slider.horizontal.3", .options).frame(width: 104)
             }
             DPad { k in
                 switch k {
@@ -147,7 +131,7 @@ struct ContentView: View {
                 }
             }
             HStack {
-                key(L("Back", "Voltar"), "arrow.uturn.backward", .back).frame(width: 104)
+                key(String(localized: "Back"), "arrow.uturn.backward", .back).frame(width: 104)
                 Spacer()
                 key("Multiview", "rectangle.on.rectangle", .multiview).frame(width: 104)
             }
@@ -157,13 +141,13 @@ struct ContentView: View {
     private var volumeChannelRow: some View {
         HStack(spacing: Kiel.Space.s4) {
             rocker("Vol", up: .volumeUp, down: .volumeDown, mid: ("speaker.slash", .mute))
-            rocker(L("Channel", "Canal"), up: .channelUp, down: .channelDown, mid: nil)
+            rocker(String(localized: "Channel"), up: .channelUp, down: .channelDown, mid: nil)
         }
     }
 
     private var sourcesButton: some View {
         Button { showSources = true } label: {
-            Label(L("Source list (HDMI, TV…)", "Lista de fontes (HDMI, TV…)"),
+            Label(String(localized: "Source list (HDMI, TV…)"),
                   systemImage: "rectangle.connected.to.line.below")
                 .frame(maxWidth: .infinity)
         }
@@ -178,7 +162,7 @@ struct ContentView: View {
                 Image(systemName: "captions.bubble").font(.system(size: 20, weight: .medium))
             }
             .buttonStyle(KielKeyStyle(height: Kiel.Size.key))
-            .accessibilityLabel(L("Subtitles", "Legendas"))
+            .accessibilityLabel(String(localized: "Subtitles"))
             digit(0)
             Button { press(.dot) } label: {
                 Text(".").font(Kiel.Font.h1)
@@ -251,7 +235,6 @@ struct ContentView: View {
 struct SettingsView: View {
     @EnvironmentObject var tv: TVClient
     @Environment(\.dismiss) var dismiss
-    @AppStorage(AppLanguage.storageKey) private var lang = AppLanguage.english.rawValue
 
     var body: some View {
         NavigationStack {
@@ -271,14 +254,14 @@ struct SettingsView: View {
                                 Spacer()
                                 if found.host == tv.host {
                                     Image(systemName: "checkmark").foregroundStyle(Kiel.accentText)
-                                        .accessibilityLabel(L("Selected", "Selecionada"))
+                                        .accessibilityLabel(String(localized: "Selected"))
                                 }
                             }
                         }
                     }
                     Button { Task { await tv.scan() } } label: {
                         HStack {
-                            Text(tv.scanning ? L("Searching…", "Procurando…") : L("Search again", "Procurar de novo"))
+                            Text(tv.scanning ? String(localized: "Searching…") : String(localized: "Search again"))
                             Spacer()
                             if tv.scanning { ProgressView() }
                         }
@@ -286,55 +269,44 @@ struct SettingsView: View {
                     .foregroundStyle(Kiel.accentText)
                     .disabled(tv.scanning)
                     if tv.online {
-                        KielBadge(text: L("Connected", "Conectada"), tone: .pos)
+                        KielBadge(text: String(localized: "Connected"), tone: .pos)
                     }
                 } header: {
-                    Text(L("TVs on your Wi-Fi", "TVs no seu Wi-Fi"))
+                    Text(String(localized: "TVs on your Wi-Fi"))
                 } footer: {
                     if tv.found.isEmpty && !tv.scanning {
-                        Text(L("No TV found. The TV must be on and on the same Wi-Fi as this iPhone",
-                               "Nenhuma TV encontrada. A TV precisa estar ligada e no mesmo Wi-Fi que este iPhone"))
+                        Text(String(localized: "No TV found. The TV must be on and on the same Wi-Fi as this iPhone"))
                             .foregroundStyle(Kiel.text3)
                     }
                 }
                 .listRowBackground(Kiel.surface)
                 .animation(Kiel.Motion.standard, value: tv.found)
                 Section {
-                    LabeledContent(L("IP address", "Endereço IP")) {
+                    LabeledContent(String(localized: "IP address")) {
                         TextField("192.168.1.50", text: $tv.host)
                             .multilineTextAlignment(.trailing)
                             .keyboardType(.numbersAndPunctuation)
                             .autocorrectionDisabled()
                             .textInputAutocapitalization(.never)
                     }
-                    Button(L("Test connection", "Testar conexão")) { Task { await tv.refreshVolume() } }
+                    Button(String(localized: "Test connection")) { Task { await tv.refreshVolume() } }
                         .foregroundStyle(Kiel.accentText)
                     if !tv.online, let e = tv.lastError {
                         Text(e).foregroundStyle(Kiel.neg).font(Kiel.Font.footnote)
                     }
                 } header: {
-                    Text(L("Enter the IP yourself", "Digitar o IP"))
+                    Text(String(localized: "Enter the IP yourself"))
                 } footer: {
-                    Text(L("On the TV: Home > Setup > Network settings > View network settings shows the IP. "
-                           + "The IP can change (DHCP); reserve a fixed IP for the TV in your router",
-                           "Na TV: Início > Configuração > Configurações de rede > Visualizar configurações de rede mostra o IP. "
-                           + "O IP pode mudar (DHCP); reserve um IP fixo para a TV no roteador"))
+                    Text(String(localized: "On the TV: Home > Setup > Network settings > View network settings shows the IP. The IP can change (DHCP); reserve a fixed IP for the TV in your router"))
                         .foregroundStyle(Kiel.text3)
-                }
-                .listRowBackground(Kiel.surface)
-                Section(L("Language", "Idioma")) {
-                    Picker(L("Language", "Idioma"), selection: $lang) {
-                        ForEach(AppLanguage.allCases) { Text($0.displayName).tag($0.rawValue) }
-                    }
-                    .pickerStyle(.segmented)
                 }
                 .listRowBackground(Kiel.surface)
             }
             .scrollContentBackground(.hidden)
             .background(Kiel.bg.ignoresSafeArea())
-            .navigationTitle(L("Settings", "Ajustes"))
+            .navigationTitle(String(localized: "Settings"))
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) { Button(L("Done", "Concluído")) { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { Button(String(localized: "Done")) { dismiss() } }
             }
             .task { if tv.found.isEmpty { await tv.scan() } }
         }

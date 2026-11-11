@@ -563,8 +563,10 @@ struct BrightnessBar: View {
 
 struct RemoteStatusBar: View {
     let connected: Bool
-    let message: String   // "Connected" or "Sent · OK"
-    let volume: Int
+    let message: String        // "Connected" or "Sent · OK"
+    /// nil while the TV hasn't reported its volume: shows "—", never a fake 0.
+    var volume: Int? = nil
+    var isMuted: Bool = false
 
     var body: some View {
         HStack(spacing: Kiel.Space.s3) {
@@ -572,15 +574,48 @@ struct RemoteStatusBar: View {
             Text(message).font(Kiel.Font.footnote).foregroundStyle(Kiel.text2)
                 .contentTransition(.opacity)
             Spacer()
-            Image(systemName: "speaker.wave.2").foregroundStyle(Kiel.text3)
-            Text("\(volume)").font(Kiel.Font.footnote.weight(.semibold)).monospacedDigit()
-                .contentTransition(.numericText())
+            HStack(spacing: Kiel.Space.s2) {
+                Image(systemName: speakerSymbol)
+                    .foregroundStyle(isMuted ? Kiel.warn : Kiel.text3)
+                    .contentTransition(.symbolEffect(.replace))
+                Text(volumeLabel)
+                    .font(Kiel.Font.footnote.weight(.semibold)).monospacedDigit()
+                    .foregroundStyle(isMuted || volume == nil ? Kiel.text3 : Kiel.text)
+                    .contentTransition(.numericText())
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(accessibilityVolume)
         }
         .padding(.horizontal, Kiel.Space.s4)
         .frame(height: Kiel.Size.controlLG)
         .background(Kiel.surface, in: Capsule())
         .overlay(Capsule().stroke(Kiel.line, lineWidth: 1))
         .animation(Kiel.Motion.standard, value: message)
+        .animation(Kiel.Motion.standard, value: volume)
+        .animation(Kiel.Motion.standard, value: isMuted)
+    }
+
+    private var speakerSymbol: String {
+        if isMuted { return "speaker.slash.fill" }
+        guard let volume else { return "speaker" }
+        switch volume {
+        case ..<1: return "speaker"
+        case 1..<34: return "speaker.wave.1"
+        case 34..<67: return "speaker.wave.2"
+        default: return "speaker.wave.3"
+        }
+    }
+
+    private var volumeLabel: String {
+        if isMuted { return String(localized: "Muted") }
+        guard let volume else { return "—" }
+        return "\(volume)"
+    }
+
+    private var accessibilityVolume: Text {
+        if isMuted { return Text("Muted") }
+        guard let volume else { return Text("Volume unknown") }
+        return Text("Volume \(volume)")
     }
 }
 

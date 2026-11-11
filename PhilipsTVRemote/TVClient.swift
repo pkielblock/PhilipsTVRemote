@@ -52,7 +52,7 @@ final class TVClient: ObservableObject {
                 }
             } catch {
                 online = false
-                lastError = L("TV not responding", "Sem resposta da TV")
+                lastError = String(localized: "TV not responding")
             }
         }
     }
@@ -102,7 +102,7 @@ final class TVClient: ObservableObject {
             }
         } catch {
             online = false
-            lastError = L("TV not responding", "Sem resposta da TV")
+            lastError = String(localized: "TV not responding")
         }
     }
 
@@ -118,7 +118,7 @@ final class TVClient: ObservableObject {
                 _ = try await session.data(for: req)
                 online = true; lastError = nil
             } catch {
-                online = false; lastError = L("TV not responding", "Sem resposta da TV")
+                online = false; lastError = String(localized: "TV not responding")
             }
         }
     }

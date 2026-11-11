@@ -9,7 +9,7 @@ No ads, no account, no cloud, no tracking.
 The UI uses Kiel UI, the design system shared by my apps: always dark, solid surfaces with a thin
 outline (no blur or glass), an 8-point grid, and capsule keys with a springy press. Blue only marks
 an active state (muted, the selected option); green means connected. Every press taps a light haptic.
-It's available in English (default) and Portuguese; you can switch in Settings.
+It follows the phone's language: Brazilian Portuguese on a Portuguese iPhone, English otherwise.
 
 ## Features
 
@@ -22,7 +22,7 @@ It's available in English (default) and Portuguese; you can switch in Settings.
 - Source picker that lists the TV's inputs (HDMI, TV, …)
 - Live connection and volume status
 - Haptic feedback on every key
-- English / Portuguese UI
+- English and Brazilian Portuguese, following the phone's language
 
 ## Requirements
 
@@ -79,16 +79,15 @@ an IP typed by hand has to be updated, so reserve a fixed IP for the TV in your 
    phone's subnet, on port 1925) and connects when it finds one.
 2. If it finds several TVs, or none, the Settings screen opens: pick your TV under
    **TVs on your Wi-Fi**, tap **Search again**, or type the IP under **Enter the IP yourself**.
-3. Optionally switch the language under **Language**, then tap **Done**.
+3. Tap **Done**.
 
 If the saved TV stops answering (for example after it got a new IP), the app searches again on
 the next launch and switches to the TV when it finds exactly one.
 
-The IP and language are stored on the phone only.
+The IP is stored on the phone only.
 
-The first time the app reaches the TV, iOS asks for local network access; allow it. That prompt
-follows the phone's language (English or Portuguese), not the in-app switch: iOS shows system
-prompts in the device language.
+The first time the app reaches the TV, iOS asks for local network access; allow it. That prompt,
+like the rest of the app, follows the phone's language.
 
 ## Power
 
@@ -139,7 +138,7 @@ generation.
 | `SourceView.swift` | Input picker |
 | `TVClient.swift` | JointSpace v1 HTTP client, TV search on the Wi-Fi, power logic |
 | `TVKey.swift` | Key names the TV accepts |
-| `Language.swift` | In-app English/Portuguese strings |
+| `Localizable.xcstrings` | App text in English (the keys) and Brazilian Portuguese |
 | `InfoPlist.xcstrings` | Local network prompt in English and Portuguese |
 
 ## Privacy

@@ -3,17 +3,15 @@ import SwiftUI
 struct SourceView: View {
     @EnvironmentObject var tv: TVClient
     @Environment(\.dismiss) var dismiss
-    @AppStorage(AppLanguage.storageKey) private var lang = AppLanguage.english.rawValue
     @State private var picks = 0
 
     var body: some View {
         NavigationStack {
             Group {
                 if tv.sources.isEmpty {
-                    ContentUnavailableView(L("No sources", "Sem fontes"),
+                    ContentUnavailableView(String(localized: "No sources"),
                         systemImage: "tv.slash",
-                        description: Text(L("The TV must be on and on the same network",
-                                             "A TV precisa estar ligada e na mesma rede")))
+                        description: Text(String(localized: "The TV must be on and on the same network")))
                 } else {
                     List(tv.sources) { src in
                         Button {
@@ -36,10 +34,10 @@ struct SourceView: View {
             }
             .background(Kiel.bg.ignoresSafeArea())
             .sensoryFeedback(.impact(weight: .light), trigger: picks)
-            .navigationTitle(L("Sources", "Fontes"))
+            .navigationTitle(String(localized: "Sources"))
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(L("Close", "Fechar")) { dismiss() }
+                    Button(String(localized: "Close")) { dismiss() }
                 }
             }
             .task { await tv.fetchSources() }

@@ -8,7 +8,7 @@ API JointSpace v1. Sem anúncios, sem conta, sem nuvem, sem rastreamento.
 
 A interface usa o Kiel UI, o design system dos meus apps: sempre escura, superfícies sólidas com
 contorno fino (sem desfoque nem vidro), grade de 8 pontos e teclas em cápsula com toque elástico. O azul
-só marca um estado ativo (mudo, a opção selecionada); verde quer dizer conectada. Cada toque dá uma vibração leve. Está disponível em inglês (padrão) e português; dá para trocar nos Ajustes.
+só marca um estado ativo (mudo, a opção selecionada); verde quer dizer conectada. Cada toque dá uma vibração leve. Segue o idioma do celular: português do Brasil num iPhone em português, inglês nos demais.
 
 ## Recursos
 
@@ -21,7 +21,7 @@ só marca um estado ativo (mudo, a opção selecionada); verde quer dizer conect
 - Seletor de fontes com as entradas da TV (HDMI, TV, …)
 - Status de conexão e volume em tempo real
 - Vibração tátil a cada tecla
-- Interface em inglês / português
+- Inglês e português do Brasil, seguindo o idioma do celular
 
 ## Requisitos
 
@@ -80,16 +80,15 @@ um IP digitado à mão precisa ser atualizado, então reserve um IP fixo para a 
    celular, na porta 1925) e conecta quando encontra.
 2. Se encontrar várias TVs, ou nenhuma, a tela de Ajustes abre: escolha sua TV em
    **TVs no seu Wi-Fi**, toque em **Procurar de novo** ou digite o IP em **Digitar o IP**.
-3. Se quiser, troque o idioma em **Idioma** e toque em **Concluído**.
+3. Toque em **Concluído**.
 
 Se a TV salva parar de responder (por exemplo, depois de pegar outro IP), o app procura de novo
 na próxima abertura e troca para a TV quando encontra exatamente uma.
 
-O IP e o idioma ficam salvos só no celular.
+O IP fica salvo só no celular.
 
-Na primeira vez que o app fala com a TV, o iOS pede acesso à rede local; permita. Esse aviso
-segue o idioma do celular (inglês ou português), não o seletor do app: o iOS mostra avisos do
-sistema no idioma do aparelho.
+Na primeira vez que o app fala com a TV, o iOS pede acesso à rede local; permita. Esse aviso,
+como o resto do app, segue o idioma do celular.
 
 ## Energia
 
@@ -138,7 +137,7 @@ O app usa JointSpace v1 em HTTP simples na porta 1925, sem autenticação nesta 
 | `SourceView.swift` | Seletor de fontes |
 | `TVClient.swift` | Cliente HTTP JointSpace v1, busca da TV no Wi-Fi, lógica de energia |
 | `TVKey.swift` | Nomes de teclas aceitos pela TV |
-| `Language.swift` | Textos em inglês/português |
+| `Localizable.xcstrings` | Textos do app em inglês (as chaves) e português do Brasil |
 | `InfoPlist.xcstrings` | Aviso de rede local em inglês e português |
 
 ## Privacidade
