@@ -18,6 +18,7 @@ It's available in English (default) and Portuguese; you can switch in Settings.
 - Volume rocker + mute, channel rocker
 - Colour keys, playback transport, number pad, subtitles
 - Adjust, Search, Format, Guide, List, Smart TV, TV/Exit
+- Finds the TV on your Wi-Fi by itself, no IP to type
 - Source picker that lists the TV's inputs (HDMI, TV, …)
 - Live connection and volume status
 - Haptic feedback on every key
@@ -55,7 +56,7 @@ signed build can instead be installed directly through Xcode.
 
 ## Find your TV's IP address
 
-Pick whichever is easiest:
+Only needed when the app can't find the TV by itself. Pick whichever is easiest:
 
 - **On the TV:** press Home, go to **Setup > Network settings > View network settings**
   (menu names vary a little by model and firmware). The IP address is listed there.
@@ -69,16 +70,19 @@ Pick whichever is easiest:
 
   A JSON response means you have the right IP and the API is on.
 
-The IP is assigned by your router (DHCP) and can change. Reserve a fixed IP for the TV in
-your router's DHCP settings so you don't have to update the app.
+The IP is assigned by your router (DHCP) and can change. The app finds the TV again on its own;
+an IP typed by hand has to be updated, so reserve a fixed IP for the TV in your router.
 
 ## Configure the app
 
-1. Open the app. On first launch the Settings screen opens by itself (or tap the gear icon).
-2. Type the TV's IP address, e.g. `192.168.1.50`.
-3. Tap **Test connection**. "Connected" means it's working.
-4. Optionally switch the language under **Language**.
-5. Tap **OK**.
+1. Turn the TV on and open the app. It searches your Wi-Fi for the TV (every address in the
+   phone's subnet, on port 1925) and connects when it finds one.
+2. If it finds several TVs, or none, the Settings screen opens: pick your TV under
+   **TVs on your Wi-Fi**, tap **Search again**, or type the IP under **Enter the IP yourself**.
+3. Optionally switch the language under **Language**, then tap **Done**.
+
+If the saved TV stops answering (for example after it got a new IP), the app searches again on
+the next launch and switches to the TV when it finds exactly one.
 
 The IP and language are stored on the phone only.
 
@@ -101,10 +105,12 @@ If your TV's Adjust menu is laid out differently, change the key sequence in
 
 ## Troubleshooting
 
-- **"No response":** check the IP, that the phone is on the same Wi-Fi as the TV, and that
-  Local Network access is allowed for the app.
-- **Works, then stops:** the TV probably got a new IP from the router. Update it in
-  Settings, or reserve a fixed IP.
+- **"No response" or no TV found:** check that the TV is on, that the phone is on the same
+  Wi-Fi as the TV, and that Local Network access is allowed for the app, then tap
+  **Search again** in Settings. Right after you allow Local Network access the first search can
+  come back empty; search again.
+- **Works, then stops:** the TV probably got a new IP from the router. Reopen the app or tap
+  **Search again**.
 - **A key does nothing:** `Guide`, `List` and `Multiview` have no documented v1 key name and
   may be ignored by some sets.
 
@@ -131,14 +137,15 @@ generation.
 | `ContentView.swift` | Remote layout, settings screen |
 | `KielUI.swift` | Kiel UI tokens and components (copied from the Kiel UI design system) |
 | `SourceView.swift` | Input picker |
-| `TVClient.swift` | JointSpace v1 HTTP client, power logic |
+| `TVClient.swift` | JointSpace v1 HTTP client, TV search on the Wi-Fi, power logic |
 | `TVKey.swift` | Key names the TV accepts |
 | `Language.swift` | In-app English/Portuguese strings |
 | `InfoPlist.xcstrings` | Local network prompt in English and Portuguese |
 
 ## Privacy
 
-The app collects no data. It only talks to the TV IP you enter, on your local network.
+The app collects no data. It only talks to devices on your local network: the search asks each address in your
+Wi-Fi's subnet for the TV's API, then the app talks to the TV it found or the IP you enter.
 Nothing is sent anywhere else.
 
 ## License

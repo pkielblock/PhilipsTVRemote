@@ -8,13 +8,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Sends remote-control commands to your TV on the local network"
+            "value" : "Finds your TV and sends it remote-control commands on the local network"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Envia comandos de controle remoto para a sua TV pela rede local"
+            "value" : "Encontra sua TV e envia comandos de controle remoto pela rede local"
           }
         }
       }

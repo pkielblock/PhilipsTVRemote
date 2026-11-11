@@ -17,6 +17,7 @@ só marca um estado ativo (mudo, a opção selecionada); verde quer dizer conect
 - Volume + mudo, troca de canal
 - Teclas coloridas, controles de reprodução, teclado numérico, legendas
 - Ajustar, Buscar, Formato, Guia, Lista, Smart TV, TV/Sair
+- Encontra a TV no seu Wi-Fi sozinho, sem digitar IP
 - Seletor de fontes com as entradas da TV (HDMI, TV, …)
 - Status de conexão e volume em tempo real
 - Vibração tátil a cada tecla
@@ -55,7 +56,7 @@ build já assinado pode ser instalado diretamente pelo Xcode.
 
 ## Descobrir o IP da TV
 
-Use o jeito mais fácil para você:
+Só é preciso quando o app não encontra a TV sozinho. Use o jeito mais fácil para você:
 
 - **Na TV:** aperte Início (Home) e vá em **Configuração > Configurações de rede >
   Visualizar configurações de rede** (os nomes mudam um pouco conforme modelo e firmware).
@@ -70,16 +71,19 @@ Use o jeito mais fácil para você:
 
   Se vier um JSON, o IP está certo e a API está ativa.
 
-O IP é atribuído pelo roteador (DHCP) e pode mudar. Reserve um IP fixo para a TV nas
-configurações de DHCP do roteador para não precisar atualizar o app.
+O IP é atribuído pelo roteador (DHCP) e pode mudar. O app encontra a TV de novo sozinho;
+um IP digitado à mão precisa ser atualizado, então reserve um IP fixo para a TV no roteador.
 
 ## Configurar o app
 
-1. Abra o app. Na primeira vez a tela de Ajustes abre sozinha (ou toque na engrenagem).
-2. Digite o IP da TV, ex.: `192.168.1.50`.
-3. Toque em **Testar conexão**. "Conectada" significa que está funcionando.
-4. Se quiser, troque o idioma em **Idioma**.
-5. Toque em **OK**.
+1. Ligue a TV e abra o app. Ele procura a TV no seu Wi-Fi (todos os endereços da sub-rede do
+   celular, na porta 1925) e conecta quando encontra.
+2. Se encontrar várias TVs, ou nenhuma, a tela de Ajustes abre: escolha sua TV em
+   **TVs no seu Wi-Fi**, toque em **Procurar de novo** ou digite o IP em **Digitar o IP**.
+3. Se quiser, troque o idioma em **Idioma** e toque em **Concluído**.
+
+Se a TV salva parar de responder (por exemplo, depois de pegar outro IP), o app procura de novo
+na próxima abertura e troca para a TV quando encontra exatamente uma.
 
 O IP e o idioma ficam salvos só no celular.
 
@@ -101,10 +105,12 @@ Se o menu Ajustar da sua TV for diferente, altere a sequência em `TVClient.scre
 
 ## Problemas comuns
 
-- **"Sem resposta":** confira o IP, se o celular está no mesmo Wi-Fi da TV e se o acesso à
-  Rede Local está permitido para o app.
-- **Funcionava e parou:** a TV provavelmente pegou outro IP do roteador. Atualize nos
-  Ajustes ou reserve um IP fixo.
+- **"Sem resposta" ou nenhuma TV encontrada:** confira se a TV está ligada, se o celular está
+  no mesmo Wi-Fi da TV e se o acesso à Rede Local está permitido para o app, e toque em
+  **Procurar de novo** nos Ajustes. Logo depois de permitir a Rede Local, a primeira busca pode
+  voltar vazia; procure de novo.
+- **Funcionava e parou:** a TV provavelmente pegou outro IP do roteador. Abra o app de novo ou
+  toque em **Procurar de novo**.
 - **Uma tecla não faz nada:** `Guide`, `List` e `Multiview` não têm nome de tecla
   documentado na v1 e podem ser ignoradas por algumas TVs.
 
@@ -130,15 +136,16 @@ O app usa JointSpace v1 em HTTP simples na porta 1925, sem autenticação nesta 
 | `ContentView.swift` | Layout do controle, tela de ajustes |
 | `KielUI.swift` | Tokens e componentes do Kiel UI (copiado do design system Kiel UI) |
 | `SourceView.swift` | Seletor de fontes |
-| `TVClient.swift` | Cliente HTTP JointSpace v1, lógica de energia |
+| `TVClient.swift` | Cliente HTTP JointSpace v1, busca da TV no Wi-Fi, lógica de energia |
 | `TVKey.swift` | Nomes de teclas aceitos pela TV |
 | `Language.swift` | Textos em inglês/português |
 | `InfoPlist.xcstrings` | Aviso de rede local em inglês e português |
 
 ## Privacidade
 
-O app não coleta nenhum dado. Ele só se comunica com o IP da TV que você informar, na sua
-rede local. Nada é enviado para nenhum outro lugar.
+O app não coleta nenhum dado. Ele só se comunica com aparelhos da sua rede local: a busca pergunta
+a cada endereço da sub-rede do seu Wi-Fi pela API da TV, e depois o app fala com a TV encontrada
+ou com o IP que você digitar. Nada é enviado para nenhum outro lugar.
 
 ## Licença
 

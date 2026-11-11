@@ -123,6 +123,95 @@ final class TVClient: ObservableObject {
         }
     }
 
+    // MARK: - Discovery
+
+    struct FoundTV: Identifiable, Hashable, Sendable {
+        let host: String
+        let name: String
+        var id: String { host }
+    }
+
+    @Published var found: [FoundTV] = []
+    @Published var scanning = false
+
+    /// Use the saved TV if it answers; otherwise search the Wi-Fi and pick the TV
+    /// when exactly one is found (the IP can change with DHCP).
+    func autoConnect() async {
+        if !host.isEmpty {
+            await refreshVolume()
+            if online { return }
+        }
+        await scan()
+        if found.count == 1, found[0].host != host {
+            host = found[0].host
+            await refreshVolume()
+        }
+    }
+
+    /// Asks every address in the phone's Wi-Fi subnet for JointSpace's /1/system on port 1925.
+    /// Plain unicast HTTP: SSDP multicast would need Apple's multicast entitlement.
+    func scan() async {
+        guard !scanning else { return }
+        // Self-check of the address math: 192.168.1.50/24 → 253 peers, /16 → its /24, /30 → 1 peer.
+        assert(Self.hosts(ip: 0xC0A8_0132, mask: 0xFFFF_FF00).count == 253
+               && Self.hosts(ip: 0xC0A8_0132, mask: 0xFFFF_0000).first == "192.168.1.1"
+               && Self.hosts(ip: 0x0A00_0001, mask: 0xFFFF_FFFC) == ["10.0.0.2"])
+        scanning = true
+        defer { scanning = false }
+        guard let net = Self.wifiSubnet() else { found = []; return }
+        let cfg = URLSessionConfiguration.ephemeral
+        cfg.timeoutIntervalForRequest = 2
+        cfg.waitsForConnectivity = false
+        let probeSession = URLSession(configuration: cfg)
+        defer { probeSession.invalidateAndCancel() }
+        found = await withTaskGroup(of: FoundTV?.self) { group in
+            for h in Self.hosts(ip: net.ip, mask: net.mask) {
+                group.addTask { await Self.probe(h, probeSession) }
+            }
+            var out: [FoundTV] = []
+            for await tv in group { if let tv { out.append(tv) } }
+            return out.sorted { $0.host.localizedStandardCompare($1.host) == .orderedAscending }
+        }
+    }
+
+    nonisolated private static func probe(_ host: String, _ session: URLSession) async -> FoundTV? {
+        guard let url = URL(string: "http://\(host):1925/1/system"),
+              let (data, resp) = try? await session.data(from: url),
+              (resp as? HTTPURLResponse)?.statusCode == 200,
+              let obj = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              let name = obj["name"] as? String ?? obj["model"] as? String else { return nil }
+        return FoundTV(host: host, name: name)
+    }
+
+    /// The phone's Wi-Fi (en0) IPv4 address and netmask, host byte order.
+    nonisolated static func wifiSubnet() -> (ip: UInt32, mask: UInt32)? {
+        var list: UnsafeMutablePointer<ifaddrs>?
+        guard getifaddrs(&list) == 0, let first = list else { return nil }
+        defer { freeifaddrs(list) }
+        for p in sequence(first: first, next: { $0.pointee.ifa_next }) {
+            let i = p.pointee
+            guard String(cString: i.ifa_name) == "en0",
+                  let addr = i.ifa_addr, addr.pointee.sa_family == UInt8(AF_INET),
+                  let mask = i.ifa_netmask else { continue }
+            func v4(_ s: UnsafeMutablePointer<sockaddr>) -> UInt32 {
+                s.withMemoryRebound(to: sockaddr_in.self, capacity: 1) { UInt32(bigEndian: $0.pointee.sin_addr.s_addr) }
+            }
+            return (v4(addr), v4(mask))
+        }
+        return nil
+    }
+
+    /// Every host in the subnet except the network, broadcast and the phone itself.
+    /// shortcut: subnets wider than /24 scan only the phone's /24; widen if a TV sits outside it.
+    nonisolated static func hosts(ip: UInt32, mask: UInt32) -> [String] {
+        let mask = max(mask, 0xFFFF_FF00)
+        let net = ip & mask, broadcast = net | ~mask
+        guard broadcast > net &+ 1 else { return [] }
+        return (net + 1 ..< broadcast).filter { $0 != ip }.map {
+            "\($0 >> 24).\($0 >> 16 & 0xFF).\($0 >> 8 & 0xFF).\($0 & 0xFF)"
+        }
+    }
+
     // MARK: - Power
 
     /// Eco "screen off": Adjust > Eco settings > Screen off. Panel goes dark

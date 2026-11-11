@@ -7,6 +7,11 @@
 //  or any blur. Every surface is a solid Kiel color with a 1 px Kiel.line stroke.
 //
 //  Drop this file into any target. Fonts use SF Pro (system); sizes follow the grid.
+//
+//  LANGUAGES: every app ships in English (en) and Brazilian Portuguese (pt-BR).
+//  Put all copy in a String Catalog (Localizable.xcstrings) with English keys,
+//  never build sentences from pieces, and format numbers, money and dates with
+//  the current locale (MoneyText below does). Currency is always BRL.
 
 import SwiftUI
 import UIKit
@@ -348,16 +353,18 @@ struct KielMeter: View {
 
 // MARK: - Money
 
-/// "R$ 6.797,56" with smaller currency and cents.
+/// BRL amount with smaller currency and cents, formatted for the locale:
+/// "R$ 6.797,56" in pt-BR, "R$6,797.56" in en.
 /// income: green with "+"; spend: text color with "−"; balance: red when negative.
 struct MoneyText: View {
     enum Kind { case neutral, income, spend, balance }
     let value: Double
     var size: CGFloat = 28
     var kind: Kind = .neutral
+    var locale: Locale = .current
 
     var body: some View {
-        let parts = Self.split(abs(value))
+        let parts = Self.split(abs(value), locale: locale)
         HStack(alignment: .firstTextBaseline, spacing: 4) {
             Text(sign + "R$").font(.system(size: size * 0.5, weight: .medium))
             Text(parts.int).font(Kiel.Font.money(size)).kerning(-size * 0.03)
@@ -365,7 +372,7 @@ struct MoneyText: View {
         }
         .foregroundStyle(color)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(value, format: .currency(code: "BRL")))
+        .accessibilityLabel(Text(value, format: .currency(code: "BRL").locale(locale)))
     }
 
     private var sign: String {
@@ -382,15 +389,16 @@ struct MoneyText: View {
         case .spend, .neutral: return Kiel.text
         }
     }
-    static func split(_ v: Double) -> (int: String, cents: String) {
+    static func split(_ v: Double, locale: Locale) -> (int: String, cents: String) {
         let f = NumberFormatter()
-        f.locale = Locale(identifier: "pt_BR")
+        f.locale = locale
         f.numberStyle = .decimal
         f.minimumFractionDigits = 2
         f.maximumFractionDigits = 2
-        let s = f.string(from: NSNumber(value: v)) ?? "0,00"
-        guard let comma = s.lastIndex(of: ",") else { return (s, "") }
-        return (String(s[..<comma]), String(s[comma...]))
+        let s = f.string(from: NSNumber(value: v)) ?? "0"
+        let sep = Character(f.decimalSeparator ?? ".")
+        guard let i = s.lastIndex(of: sep) else { return (s, "") }
+        return (String(s[..<i]), String(s[i...]))
     }
 }
 
@@ -638,7 +646,7 @@ struct PressScale: ButtonStyle {
             }
             MoneyText(value: -1646.01, size: 48, kind: .balance)
             KielMeter(value: 0.506)
-            HStack { KielBadge(text: "Pago", tone: .pos); KielBadge(text: "Pendente", tone: .warn); KielBadge(text: "Atrasado", tone: .neg) }
+            HStack { KielBadge(text: String(localized: "Paid"), tone: .pos); KielBadge(text: String(localized: "Pending"), tone: .warn); KielBadge(text: String(localized: "Overdue"), tone: .neg) }
             RemoteStatusBar(connected: true, message: "Connected", volume: 25)
             DPad { _ in }.frame(maxWidth: .infinity)
         }

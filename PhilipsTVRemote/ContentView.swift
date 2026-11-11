@@ -40,8 +40,9 @@ struct ContentView: View {
             .sheet(isPresented: $showSettings) { SettingsView().environmentObject(tv) }
             .sheet(isPresented: $showSources) { SourceView().environmentObject(tv) }
             .task {
+                await tv.autoConnect()
+                // None found, or several and none chosen yet: let the user pick or type the IP.
                 if tv.host.isEmpty { showSettings = true }
-                await tv.refreshVolume()
             }
         }
     }
@@ -52,7 +53,8 @@ struct ContentView: View {
     private var statusBar: some View {
         HStack(spacing: Kiel.Space.s3) {
             StatusDot(color: tv.online ? Kiel.pos : Kiel.text3, live: tv.online)
-            Text(tv.host.isEmpty ? L("Set the TV IP in settings", "Defina o IP da TV nos ajustes")
+            Text(tv.scanning ? L("Searching for your TV…", "Procurando sua TV…")
+                 : tv.host.isEmpty ? L("No TV found. Open settings", "Nenhuma TV encontrada. Abra os ajustes")
                  : tv.online ? L("Connected", "Conectada") : L("No response", "Sem resposta"))
                 .font(Kiel.Font.footnote).foregroundStyle(Kiel.text2)
                 .contentTransition(.opacity)
@@ -255,6 +257,49 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 Section {
+                    ForEach(tv.found) { found in
+                        Button {
+                            tv.host = found.host
+                            Task { await tv.refreshVolume() }
+                        } label: {
+                            HStack(spacing: Kiel.Space.s3) {
+                                Image(systemName: "tv").foregroundStyle(Kiel.text2).frame(width: 32)
+                                VStack(alignment: .leading, spacing: 0) {
+                                    Text(found.name).font(Kiel.Font.body.weight(.medium)).foregroundStyle(Kiel.text)
+                                    Text(found.host).font(Kiel.Font.caption).foregroundStyle(Kiel.text3)
+                                }
+                                Spacer()
+                                if found.host == tv.host {
+                                    Image(systemName: "checkmark").foregroundStyle(Kiel.accentText)
+                                        .accessibilityLabel(L("Selected", "Selecionada"))
+                                }
+                            }
+                        }
+                    }
+                    Button { Task { await tv.scan() } } label: {
+                        HStack {
+                            Text(tv.scanning ? L("Searching…", "Procurando…") : L("Search again", "Procurar de novo"))
+                            Spacer()
+                            if tv.scanning { ProgressView() }
+                        }
+                    }
+                    .foregroundStyle(Kiel.accentText)
+                    .disabled(tv.scanning)
+                    if tv.online {
+                        KielBadge(text: L("Connected", "Conectada"), tone: .pos)
+                    }
+                } header: {
+                    Text(L("TVs on your Wi-Fi", "TVs no seu Wi-Fi"))
+                } footer: {
+                    if tv.found.isEmpty && !tv.scanning {
+                        Text(L("No TV found. The TV must be on and on the same Wi-Fi as this iPhone",
+                               "Nenhuma TV encontrada. A TV precisa estar ligada e no mesmo Wi-Fi que este iPhone"))
+                            .foregroundStyle(Kiel.text3)
+                    }
+                }
+                .listRowBackground(Kiel.surface)
+                .animation(Kiel.Motion.standard, value: tv.found)
+                Section {
                     LabeledContent(L("IP address", "Endereço IP")) {
                         TextField("192.168.1.50", text: $tv.host)
                             .multilineTextAlignment(.trailing)
@@ -264,13 +309,11 @@ struct SettingsView: View {
                     }
                     Button(L("Test connection", "Testar conexão")) { Task { await tv.refreshVolume() } }
                         .foregroundStyle(Kiel.accentText)
-                    if tv.online {
-                        KielBadge(text: L("Connected", "Conectada"), tone: .pos)
-                    } else if let e = tv.lastError {
+                    if !tv.online, let e = tv.lastError {
                         Text(e).foregroundStyle(Kiel.neg).font(Kiel.Font.footnote)
                     }
                 } header: {
-                    Text("TV")
+                    Text(L("Enter the IP yourself", "Digitar o IP"))
                 } footer: {
                     Text(L("On the TV: Home > Setup > Network settings > View network settings shows the IP. "
                            + "The IP can change (DHCP); reserve a fixed IP for the TV in your router",
@@ -291,8 +334,9 @@ struct SettingsView: View {
             .background(Kiel.bg.ignoresSafeArea())
             .navigationTitle(L("Settings", "Ajustes"))
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) { Button("OK") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { Button(L("Done", "Concluído")) { dismiss() } }
             }
+            .task { if tv.found.isEmpty { await tv.scan() } }
         }
     }
 }
