@@ -36,7 +36,7 @@ final class TVClient: ObservableObject {
 
     /// Send a remote-control key. The TV always answers 200, so success here
     /// means the request reached the set, not that the key was valid.
-    func sendKey(_ key: RemoteKey) {
+    func sendKey(_ key: TVKey) {
         guard let url = base()?.appendingPathComponent("input/key") else { return }
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
@@ -130,7 +130,7 @@ final class TVClient: ObservableObject {
     /// Real standby isn't used: it drops Wi-Fi and the set ignores Wake-on-LAN.
     /// Delays give the on-screen menu time to open between keys.
     func screenOff() {
-        let keys: [RemoteKey] = [.adjust, .cursorRight, .confirm, .cursorDown, .confirm]
+        let keys: [TVKey] = [.adjust, .cursorRight, .confirm, .cursorDown, .confirm]
         Task {
             for k in keys {
                 sendKey(k)

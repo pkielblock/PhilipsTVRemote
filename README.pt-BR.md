@@ -6,9 +6,9 @@ Controle remoto nativo em SwiftUI para iPhone, feito para TVs Philips NetTV mais
 (chassi TPM16.5L, ex.: **32PHG5201/78**). Ele conversa com a TV pela rede local através da
 API JointSpace v1. Sem anúncios, sem conta, sem nuvem, sem rastreamento.
 
-A interface é sempre escura: fundo preto, superfícies brancas discretas e um único destaque azul
-(#346bf1), usado só para marcar um estado ativo (conectada, mudo, a opção selecionada). Os botões
-usam Liquid Glass no iOS 26 ou superior e botões com borda no iOS 17–18. Cada toque dá uma vibração leve. Está disponível em inglês (padrão) e português; dá para trocar nos Ajustes.
+A interface usa o Kiel UI, o design system dos meus apps: sempre escura, superfícies sólidas com
+contorno fino (sem desfoque nem vidro), grade de 8 pontos e teclas em cápsula com toque elástico. O azul
+só marca um estado ativo (mudo, a opção selecionada); verde quer dizer conectada. Cada toque dá uma vibração leve. Está disponível em inglês (padrão) e português; dá para trocar nos Ajustes.
 
 ## Recursos
 
@@ -114,7 +114,7 @@ O app usa JointSpace v1 em HTTP simples na porta 1925, sem autenticação nesta 
 
 | Chamada | Para quê |
 | --- | --- |
-| `POST /1/input/key` com `{"key":"VolumeUp"}` | Enviar uma tecla (lista completa em `RemoteKey.swift`) |
+| `POST /1/input/key` com `{"key":"VolumeUp"}` | Enviar uma tecla (lista completa em `TVKey.swift`) |
 | `GET/POST /1/audio/volume` | Ler ou definir volume e mudo |
 | `GET /1/sources` | Listar entradas |
 | `POST /1/sources/current` com `{"id":"hdmi1"}` | Trocar de entrada |
@@ -127,13 +127,13 @@ O app usa JointSpace v1 em HTTP simples na porta 1925, sem autenticação nesta 
 | Arquivo | O que faz |
 | --- | --- |
 | `PhilipsTVRemoteApp.swift` | Ponto de entrada do app |
-| `ContentView.swift` | Layout do controle, tela de ajustes, estilo dos botões |
+| `ContentView.swift` | Layout do controle, tela de ajustes |
+| `KielUI.swift` | Tokens e componentes do Kiel UI (copiado do design system Kiel UI) |
 | `SourceView.swift` | Seletor de fontes |
 | `TVClient.swift` | Cliente HTTP JointSpace v1, lógica de energia |
-| `RemoteKey.swift` | Nomes de teclas aceitos pela TV |
+| `TVKey.swift` | Nomes de teclas aceitos pela TV |
 | `Language.swift` | Textos em inglês/português |
 | `InfoPlist.xcstrings` | Aviso de rede local em inglês e português |
-| `scripts/icon.swift` | Desenha o ícone do app (`swift scripts/icon.swift`) |
 
 ## Privacidade
 

@@ -10,7 +10,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
+                VStack(spacing: Kiel.Space.s4) {
                     statusBar
                     powerRow
                     transportRows
@@ -23,14 +23,16 @@ struct ContentView: View {
                     sourcesButton
                     numberPad
                 }
-                .padding(16)
+                .padding(Kiel.Space.s4)
             }
-            .background(Color.black.ignoresSafeArea())
+            .background(Kiel.bg.ignoresSafeArea())
+            .toolbarBackground(Kiel.bg, for: .navigationBar)
             .navigationTitle("Philips TV")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showSettings = true } label: { Image(systemName: "gearshape") }
+                        .accessibilityLabel(L("Settings", "Ajustes"))
                 }
             }
             .sensoryFeedback(.impact(weight: .light), trigger: taps)
@@ -46,41 +48,45 @@ struct ContentView: View {
 
     // MARK: - Sections
 
+    /// Kiel's RemoteStatusBar layout, kept local because volume can be unknown and mute changes the icon.
     private var statusBar: some View {
-        HStack {
-            Circle().fill(tv.online ? Color.accentColor : .secondary).frame(width: 8, height: 8)
+        HStack(spacing: Kiel.Space.s3) {
+            StatusDot(color: tv.online ? Kiel.pos : Kiel.text3, live: tv.online)
             Text(tv.host.isEmpty ? L("Set the TV IP in settings", "Defina o IP da TV nos ajustes")
                  : tv.online ? L("Connected", "Conectada") : L("No response", "Sem resposta"))
-                .font(.caption).foregroundStyle(.secondary)
+                .font(Kiel.Font.footnote).foregroundStyle(Kiel.text2)
                 .contentTransition(.opacity)
             Spacer()
             if let v = tv.volume {
-                Label("\(v)", systemImage: tv.muted ? "speaker.slash" : "speaker.wave.2")
-                    .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                Image(systemName: tv.muted ? "speaker.slash" : "speaker.wave.2").foregroundStyle(Kiel.text3)
+                Text("\(v)").font(Kiel.Font.footnote.weight(.semibold)).monospacedDigit()
+                    .foregroundStyle(Kiel.text)
                     .contentTransition(.numericText(value: Double(v)))
             }
         }
-        .animation(.easeOut(duration: 0.2), value: tv.online)
-        .animation(.snappy, value: tv.volume)
-        .padding(.horizontal, 16).padding(.vertical, 12)
-        .background(.white.opacity(0.04), in: Capsule())
+        .animation(Kiel.Motion.standard, value: tv.online)
+        .animation(Kiel.Motion.standard, value: tv.volume)
+        .padding(.horizontal, Kiel.Space.s4)
+        .frame(height: Kiel.Size.controlLG)
+        .background(Kiel.surface, in: Capsule())
+        .overlay(Capsule().stroke(Kiel.line, lineWidth: 1))
     }
 
     private var powerRow: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Kiel.Space.s3) {
             bigButton(L("Turn on", "Ligar"), "power") { tv.screenOn() }
             bigButton(L("Screen off", "Tela off"), "poweroff") { tv.screenOff() }
         }
     }
 
     private var transportRows: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 12) {
+        VStack(spacing: Kiel.Space.s2) {
+            HStack(spacing: Kiel.Space.s3) {
                 key("", "stop.fill", .stop)
                 key("", "pause.fill", .pause)
                 key("", "record.circle", .record)
             }
-            HStack(spacing: 12) {
+            HStack(spacing: Kiel.Space.s3) {
                 key("", "backward.fill", .rewind)
                 key("", "play.fill", .play)
                 key("", "forward.fill", .fastForward)
@@ -89,7 +95,7 @@ struct ContentView: View {
     }
 
     private var toolRow: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Kiel.Space.s3) {
             key(L("Adjust", "Ajustar"), "gearshape", .adjust)
             key(L("Search", "Buscar"), "magnifyingglass", .find)
             key(L("Format", "Formato"), "aspectratio", .viewmode)
@@ -97,7 +103,7 @@ struct ContentView: View {
     }
 
     private var guideRow: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Kiel.Space.s3) {
             key(L("Guide", "Guia"), "list.bullet.rectangle", .guide)
             key(L("List", "Lista"), "list.bullet", .list)
             key(L("Sources", "Fontes"), "cable.connector", .source)
@@ -105,7 +111,7 @@ struct ContentView: View {
     }
 
     private var smartRow: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Kiel.Space.s3) {
             key("Smart TV", "square.grid.2x2", .online)
             key(L("Home", "Início"), "house.fill", .home)
             key(L("TV / Exit", "TV / Sair"), "tv", .watchTV)
@@ -113,37 +119,31 @@ struct ContentView: View {
     }
 
     private var colorRow: some View {
-        HStack(spacing: 12) {
-            colorKey(.red, .red)
-            colorKey(.green, .green)
-            colorKey(.yellow, .yellow)
-            colorKey(.blue, .blue)
+        HStack(spacing: Kiel.Space.s3) {
+            colorKey(.red, .red, L("Red", "Vermelho"))
+            colorKey(.green, .green, L("Green", "Verde"))
+            colorKey(.yellow, .yellow, L("Yellow", "Amarelo"))
+            colorKey(.blue, .blue, L("Blue", "Azul"))
         }
     }
 
     /// D-pad with Info/Options above and Back/Multiview below, as on the remote.
     private var dpadCluster: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Kiel.Space.s2) {
             HStack {
                 key("Info", "info.circle", .info).frame(width: 104)
                 Spacer()
                 key(L("Options", "Opções"), "slider.horizontal.3", .options).frame(width: 104)
             }
-            VStack(spacing: 4) {
-                arrow("chevron.up", .cursorUp)
-                HStack(spacing: 4) {
-                    arrow("chevron.left", .cursorLeft)
-                    Button { press(.confirm) } label: {
-                        Text("OK").font(.title3.weight(.semibold)).frame(width: 64, height: 64)
-                    }
-                    .glassButton()
-                    .buttonBorderShape(.circle)
-                    arrow("chevron.right", .cursorRight)
+            DPad { k in
+                switch k {
+                case .up: press(.cursorUp)
+                case .down: press(.cursorDown)
+                case .left: press(.cursorLeft)
+                case .right: press(.cursorRight)
+                case .ok: press(.confirm)
                 }
-                arrow("chevron.down", .cursorDown)
             }
-            .padding(16)
-            .background(.white.opacity(0.04), in: Circle())
             HStack {
                 key(L("Back", "Voltar"), "arrow.uturn.backward", .back).frame(width: 104)
                 Spacer()
@@ -153,7 +153,7 @@ struct ContentView: View {
     }
 
     private var volumeChannelRow: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Kiel.Space.s4) {
             rocker("Vol", up: .volumeUp, down: .volumeDown, mid: ("speaker.slash", .mute))
             rocker(L("Channel", "Canal"), up: .channelUp, down: .channelDown, mid: nil)
         }
@@ -163,96 +163,86 @@ struct ContentView: View {
         Button { showSources = true } label: {
             Label(L("Source list (HDMI, TV…)", "Lista de fontes (HDMI, TV…)"),
                   systemImage: "rectangle.connected.to.line.below")
-                .frame(maxWidth: .infinity, minHeight: 48)
+                .frame(maxWidth: .infinity)
         }
-        .glassButton()
+        .buttonStyle(KielButtonStyle(kind: .secondary, size: .large, capsule: true))
     }
 
     private var numberPad: some View {
-        let cols = Array(repeating: GridItem(.flexible()), count: 3)
-        return LazyVGrid(columns: cols, spacing: 12) {
+        let cols = Array(repeating: GridItem(.flexible(), spacing: Kiel.Space.s3), count: 3)
+        return LazyVGrid(columns: cols, spacing: Kiel.Space.s3) {
             ForEach(1...9, id: \.self) { digit($0) }
             Button { press(.subtitle) } label: {
-                Image(systemName: "captions.bubble").frame(maxWidth: .infinity, minHeight: 48)
-            }.glassButton()
+                Image(systemName: "captions.bubble").font(.system(size: 20, weight: .medium))
+            }
+            .buttonStyle(KielKeyStyle(height: Kiel.Size.key))
+            .accessibilityLabel(L("Subtitles", "Legendas"))
             digit(0)
             Button { press(.dot) } label: {
-                Text(".").font(.title.weight(.semibold)).frame(maxWidth: .infinity, minHeight: 48)
-            }.glassButton()
+                Text(".").font(Kiel.Font.h1)
+            }
+            .buttonStyle(KielKeyStyle(height: Kiel.Size.key))
         }
     }
 
     // MARK: - Builders
 
     /// Every key press taps the haptic engine once.
-    private func press(_ k: RemoteKey) {
+    private func press(_ k: TVKey) {
         taps += 1
         tv.sendKey(k)
     }
 
-    private func key(_ title: String, _ icon: String, _ k: RemoteKey) -> some View {
+    /// Same look as Kiel's RemoteKey, but icon-only keys keep the SF Symbol's spoken name.
+    private func key(_ title: String, _ icon: String, _ k: TVKey) -> some View {
         Button { press(k) } label: {
-            VStack(spacing: 4) {
-                Image(systemName: icon).font(.title3)
-                if !title.isEmpty { Text(title).font(.caption2).lineLimit(1) }
+            VStack(spacing: Kiel.Space.s1) {
+                Image(systemName: icon).font(.system(size: 20, weight: .medium))
+                if !title.isEmpty { Text(title).font(Kiel.Font.caption).lineLimit(1) }
             }
-            .frame(maxWidth: .infinity, minHeight: 56)
         }
-        .glassButton()
+        .buttonStyle(KielKeyStyle(height: title.isEmpty ? 64 : 72))
     }
 
-    private func arrow(_ icon: String, _ k: RemoteKey) -> some View {
-        Button { press(k) } label: {
-            Image(systemName: icon).font(.title2.weight(.semibold))
-                .foregroundStyle(.primary)
-                .frame(width: 64, height: 64)
-                .contentShape(Rectangle())
-        }
-    }
-
-    private func rocker(_ label: String, up: RemoteKey, down: RemoteKey,
-                        mid: (String, RemoteKey)?) -> some View {
-        VStack(spacing: 8) {
-            Button { press(up) } label: {
-                Image(systemName: "plus").frame(maxWidth: .infinity, minHeight: 44)
-            }.glassButton()
+    private func rocker(_ label: String, up: TVKey, down: TVKey,
+                        mid: (String, TVKey)?) -> some View {
+        VStack(spacing: Kiel.Space.s2) {
+            Button { press(up) } label: { Image(systemName: "plus").font(.system(size: 20, weight: .medium)) }
+                .buttonStyle(KielKeyStyle(height: Kiel.Size.key))
             if let mid {
-                Button { press(mid.1) } label: {
-                    // Accent marks the active (muted) state.
-                    Image(systemName: mid.0).foregroundStyle(tv.muted ? Color.accentColor : .primary)
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                }.glassButton()
+                // Accent marks the active (muted) state.
+                Button { press(mid.1) } label: { Image(systemName: mid.0).font(.system(size: 20, weight: .medium)) }
+                    .buttonStyle(KielKeyStyle(height: Kiel.Size.key, tint: tv.muted ? Kiel.accentText : Kiel.text))
             } else {
-                Text(label).font(.caption).foregroundStyle(.secondary).frame(minHeight: 44)
+                Text(label).font(Kiel.Font.footnote).foregroundStyle(Kiel.text3).frame(minHeight: Kiel.Size.key)
             }
-            Button { press(down) } label: {
-                Image(systemName: "minus").frame(maxWidth: .infinity, minHeight: 44)
-            }.glassButton()
+            Button { press(down) } label: { Image(systemName: "minus").font(.system(size: 20, weight: .medium)) }
+                .buttonStyle(KielKeyStyle(height: Kiel.Size.key))
         }
     }
 
-    private func colorKey(_ k: RemoteKey, _ c: Color) -> some View {
+    private func colorKey(_ k: TVKey, _ c: Color, _ name: String) -> some View {
         // The TV's colour keys keep their colour as content, on a neutral key.
         Button { press(k) } label: {
             Capsule().fill(c.opacity(0.8)).frame(width: 32, height: 8)
-                .frame(maxWidth: .infinity, minHeight: 44)
         }
-        .glassButton()
+        .buttonStyle(KielKeyStyle(height: Kiel.Size.controlLG))
+        .accessibilityLabel(name)
     }
 
     private func digit(_ n: Int) -> some View {
-        Button { if let k = RemoteKey.digit(n) { press(k) } } label: {
-            Text("\(n)").font(.title3.monospacedDigit()).frame(maxWidth: .infinity, minHeight: 48)
-        }.glassButton()
+        Button { if let k = TVKey.digit(n) { press(k) } } label: {
+            Text("\(n)").font(Kiel.Font.title.monospacedDigit())
+        }
+        .buttonStyle(KielKeyStyle(height: Kiel.Size.key))
     }
 
     private func bigButton(_ title: String, _ icon: String,
                            action: @escaping () -> Void) -> some View {
         Button { taps += 1; action() } label: {
-            Label(title, systemImage: icon).font(.body.weight(.medium))
-                .frame(maxWidth: .infinity, minHeight: 56)
+            Label(title, systemImage: icon).frame(maxWidth: .infinity)
         }
-        .glassButton()
+        .buttonStyle(KielButtonStyle(kind: .secondary, size: .large, capsule: true))
     }
 }
 
@@ -273,11 +263,11 @@ struct SettingsView: View {
                             .textInputAutocapitalization(.never)
                     }
                     Button(L("Test connection", "Testar conexão")) { Task { await tv.refreshVolume() } }
+                        .foregroundStyle(Kiel.accentText)
                     if tv.online {
-                        Label(L("Connected", "Conectada"), systemImage: "checkmark.circle.fill")
-                            .foregroundStyle(Color.accentColor).font(.caption)
+                        KielBadge(text: L("Connected", "Conectada"), tone: .pos)
                     } else if let e = tv.lastError {
-                        Text(e).foregroundStyle(Color(red: 240 / 255, green: 92 / 255, blue: 92 / 255)).font(.caption)
+                        Text(e).foregroundStyle(Kiel.neg).font(Kiel.Font.footnote)
                     }
                 } header: {
                     Text("TV")
@@ -286,31 +276,24 @@ struct SettingsView: View {
                            + "The IP can change (DHCP); reserve a fixed IP for the TV in your router",
                            "Na TV: Início > Configuração > Configurações de rede > Visualizar configurações de rede mostra o IP. "
                            + "O IP pode mudar (DHCP); reserve um IP fixo para a TV no roteador"))
+                        .foregroundStyle(Kiel.text3)
                 }
-                .listRowBackground(Color.white.opacity(0.04))
+                .listRowBackground(Kiel.surface)
                 Section(L("Language", "Idioma")) {
                     Picker(L("Language", "Idioma"), selection: $lang) {
                         ForEach(AppLanguage.allCases) { Text($0.displayName).tag($0.rawValue) }
                     }
                     .pickerStyle(.segmented)
                 }
-                .listRowBackground(Color.white.opacity(0.04))
+                .listRowBackground(Kiel.surface)
             }
             .scrollContentBackground(.hidden)
-            .background(Color.black.ignoresSafeArea())
+            .background(Kiel.bg.ignoresSafeArea())
             .navigationTitle(L("Settings", "Ajustes"))
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) { Button("OK") { dismiss() } }
             }
         }
-    }
-}
-
-extension View {
-    /// Liquid Glass button on iOS 26+, bordered style before that.
-    @ViewBuilder
-    func glassButton() -> some View {
-        if #available(iOS 26, *) { buttonStyle(.glass) } else { buttonStyle(.bordered) }
     }
 }
 

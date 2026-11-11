@@ -3,7 +3,7 @@ import Foundation
 /// JointSpace v1 key names accepted by the TPM16.5L chassis.
 /// `guide`, `list` and `multiview` have no documented v1 key; they are
 /// best-effort strings and may be no-ops on this set.
-enum RemoteKey: String {
+enum TVKey: String {
     case standby        = "Standby"
     case back           = "Back"
     case home           = "Home"
@@ -54,7 +54,7 @@ enum RemoteKey: String {
     case teletext       = "Teletext"
     case ambilight      = "AmbilightOnOff"
 
-    static func digit(_ n: Int) -> RemoteKey? {
-        RemoteKey(rawValue: "Digit\(n)")
+    static func digit(_ n: Int) -> TVKey? {
+        TVKey(rawValue: "Digit\(n)")
     }
 }

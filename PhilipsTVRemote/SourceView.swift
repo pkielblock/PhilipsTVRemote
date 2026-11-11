@@ -23,18 +23,18 @@ struct SourceView: View {
                         } label: {
                             HStack {
                                 Image(systemName: icon(for: src.id))
-                                    .frame(width: 28)
-                                Text(src.name)
+                                    .frame(width: 32).foregroundStyle(Kiel.text2)
+                                Text(src.name).foregroundStyle(Kiel.text)
                                 Spacer()
-                                Text(src.id).font(.caption).foregroundStyle(.secondary)
+                                Text(src.id).font(Kiel.Font.caption).foregroundStyle(Kiel.text3)
                             }
                         }
-                        .listRowBackground(Color.white.opacity(0.04))
+                        .listRowBackground(Kiel.surface)
                     }
                     .scrollContentBackground(.hidden)
                 }
             }
-            .background(Color.black.ignoresSafeArea())
+            .background(Kiel.bg.ignoresSafeArea())
             .sensoryFeedback(.impact(weight: .light), trigger: picks)
             .navigationTitle(L("Sources", "Fontes"))
             .toolbar {

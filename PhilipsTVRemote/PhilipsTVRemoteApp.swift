@@ -5,7 +5,7 @@ struct PhilipsTVRemoteApp: App {
     @StateObject private var tv = TVClient()
 
     init() {
-        // Selected segment uses the accent (#346bf1, the AccentColor asset).
+        // Selected segment uses the Kiel accent (the AccentColor asset mirrors Kiel.accent).
         UISegmentedControl.appearance().selectedSegmentTintColor = UIColor(named: "AccentColor")
         UISegmentedControl.appearance().setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
     }

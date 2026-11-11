@@ -6,9 +6,9 @@ A native SwiftUI iPhone remote for older Philips NetTV sets (chassis TPM16.5L, e
 **32PHG5201/78**). It talks to the TV over your local network through the JointSpace v1 API.
 No ads, no account, no cloud, no tracking.
 
-The UI is always dark: a black background, quiet white surfaces and one blue accent (#346bf1)
-that only marks an active state (connected, muted, the selected option). Buttons use
-Liquid Glass on iOS 26 and later, with bordered buttons on iOS 17–18. Every press taps a light haptic.
+The UI uses Kiel UI, the design system shared by my apps: always dark, solid surfaces with a thin
+outline (no blur or glass), an 8-point grid, and capsule keys with a springy press. Blue only marks
+an active state (muted, the selected option); green means connected. Every press taps a light haptic.
 It's available in English (default) and Portuguese; you can switch in Settings.
 
 ## Features
@@ -115,7 +115,7 @@ generation.
 
 | Call | Purpose |
 | --- | --- |
-| `POST /1/input/key` with `{"key":"VolumeUp"}` | Send a remote key (full list in `RemoteKey.swift`) |
+| `POST /1/input/key` with `{"key":"VolumeUp"}` | Send a remote key (full list in `TVKey.swift`) |
 | `GET/POST /1/audio/volume` | Read or set volume and mute |
 | `GET /1/sources` | List inputs |
 | `POST /1/sources/current` with `{"id":"hdmi1"}` | Switch input |
@@ -128,13 +128,13 @@ generation.
 | File | What it does |
 | --- | --- |
 | `PhilipsTVRemoteApp.swift` | App entry point |
-| `ContentView.swift` | Remote layout, settings screen, button styling |
+| `ContentView.swift` | Remote layout, settings screen |
+| `KielUI.swift` | Kiel UI tokens and components (copied from the Kiel UI design system) |
 | `SourceView.swift` | Input picker |
 | `TVClient.swift` | JointSpace v1 HTTP client, power logic |
-| `RemoteKey.swift` | Key names the TV accepts |
+| `TVKey.swift` | Key names the TV accepts |
 | `Language.swift` | In-app English/Portuguese strings |
 | `InfoPlist.xcstrings` | Local network prompt in English and Portuguese |
-| `scripts/icon.swift` | Draws the app icon (`swift scripts/icon.swift`) |
 
 ## Privacy
 
